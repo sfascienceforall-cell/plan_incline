@@ -1,0 +1,172 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#fff;font-family:system-ui,-apple-system,sans-serif;}
+canvas{display:block;border-radius:12px;border:1.5px solid #e8e8e8;touch-action:none;}
+.fml{font-size:13px;padding:10px 16px;border-radius:20px;background:#f5f5f5;border:1.5px solid #d0d0d0;color:#2c2c2a;margin:6px 0;font-family:ui-monospace,monospace;line-height:1.8;}
+.row{display:flex;align-items:center;gap:10px;margin:6px 0;flex-wrap:wrap;}
+.pill{font-size:13px;font-weight:500;color:#2c2c2a;background:#f5f5f5;border:1.5px solid #d0d0d0;border-radius:20px;padding:6px 14px;white-space:nowrap;}
+.val{min-width:70px;text-align:center;font-size:13px;font-weight:500;color:#2c2c2a;background:#f5f5f5;border:1.5px solid #d0d0d0;border-radius:20px;padding:5px 10px;}
+.btn{padding:8px 16px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid #d0d0d0;background:#fff;color:#2c2c2a;}
+.info{font-size:12px;padding:8px 14px;border-radius:20px;background:#f5f5f5;border:1.5px solid #d0d0d0;color:#555;margin:6px 0;font-family:ui-monospace,monospace;line-height:1.8;}
+input[type=range]{flex:1;min-width:110px;}
+</style>
+
+<canvas id="cv" style="width:100%;height:60vh;min-height:400px;"></canvas>
+
+<div class="fml">
+  <b style="color:#0F6E56">mg·sinθ</b> (moteur, le long de la pente) &nbsp;vs&nbsp; <b style="color:#E24B4A">frottement max = μₛ·N = μₛ·mg·cosθ</b> &nbsp;⇒&nbsp; ça glisse quand <b style="color:#a32d2d">tan θ > μₛ</b> &nbsp;(indépendant de la masse !)
+</div>
+
+<div class="row">
+  <span class="pill" style="min-width:120px;border-color:#f5c88f;color:#BA7517;">θ &nbsp;inclinaison</span>
+  <input type="range" id="th" min="3" max="55" value="18" step="1" style="accent-color:#BA7517;">
+  <span class="val" id="thv" style="border-color:#f5c88f;color:#BA7517;">18°</span>
+</div>
+<div class="row">
+  <span class="pill" style="min-width:120px;border-color:#f09595;color:#E24B4A;">μₛ &nbsp;statique</span>
+  <input type="range" id="mus" min="0.05" max="1" value="0.4" step="0.05" style="accent-color:#E24B4A;">
+  <span class="val" id="musv" style="border-color:#f09595;color:#E24B4A;">0.40</span>
+</div>
+<div class="row">
+  <span class="pill" style="min-width:120px;border-color:#f5c88f;color:#BA7517;">μc &nbsp;cinétique</span>
+  <input type="range" id="muc" min="0.05" max="1" value="0.25" step="0.05" style="accent-color:#BA7517;">
+  <span class="val" id="mucv" style="border-color:#f5c88f;color:#BA7517;">0.25</span>
+</div>
+<div class="row">
+  <button class="btn" style="border-color:#f09595;background:#fcebeb;color:#a32d2d;" onclick="reset()">Replacer le bloc</button>
+</div>
+
+<div class="info" id="info"></div>
+
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const INK='#3d3d3a',BLUE='#378ADD',BLUE_D='#185fa5',RED='#E24B4A',DRED='#a32d2d',GREEN='#1D9E75',GREEN_D='#0F6E56',ORANGE='#BA7517',GREY='#9aa0a6',AX='#c8ccd0';
+let W=0,H=0,dpr=1;
+const m=2,g=9.81;
+let thDeg=18,mus=0.4,muc=0.25;
+let d=0,vel=0,sliding=false,init=false,Lslope=0;
+
+function bind(id,fmt,f){const s=document.getElementById(id),o=document.getElementById(id+'v');
+  s.addEventListener('input',()=>{const v=parseFloat(s.value);f(v);o.textContent=fmt(v);});}
+bind('th',v=>v+'°',v=>thDeg=v);
+bind('mus',v=>v.toFixed(2),v=>{mus=v;if(muc>mus){muc=mus;document.getElementById('muc').value=mus;document.getElementById('mucv').textContent=mus.toFixed(2);}});
+bind('muc',v=>v.toFixed(2),v=>{muc=Math.min(v,mus);if(v>mus){document.getElementById('muc').value=mus;document.getElementById('mucv').textContent=mus.toFixed(2);}});
+function reset(){d=Lslope*0.72;vel=0;sliding=false;}
+
+function syncSize(){const r=cv.getBoundingClientRect();dpr=window.devicePixelRatio||1;
+  const nW=Math.round(r.width)||700,nH=Math.round(r.height)||410;
+  if(nW!==W||nH!==H){W=nW;H=nH;cv.width=W*dpr;cv.height=H*dpr;init=false;}
+  ctx.setTransform(dpr,0,0,dpr,0,0);}
+
+function arrow(x,y,vx,vy,col,lab,w,dash){
+  const len=Math.hypot(vx,vy);if(len<3)return;
+  const ex=x+vx,ey=y+vy;
+  ctx.strokeStyle=col;ctx.lineWidth=w||2.5;ctx.lineCap='round';
+  if(dash)ctx.setLineDash(dash);
+  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(ex,ey);ctx.stroke();ctx.setLineDash([]);
+  const hs=(w||2.5)*3.0,ang=Math.atan2(vy,vx);
+  ctx.fillStyle=col;ctx.save();ctx.translate(ex,ey);ctx.rotate(ang);
+  ctx.beginPath();ctx.moveTo(hs,0);ctx.lineTo(-hs*0.7,-hs*0.55);ctx.lineTo(-hs*0.7,hs*0.55);ctx.closePath();ctx.fill();ctx.restore();
+  if(lab){ctx.font='700 12px system-ui';ctx.textAlign='center';ctx.fillStyle=col;
+    ctx.fillText(lab,ex+vx/len*15,ey+vy/len*15+4);}
+}
+
+function draw(){
+  syncSize();
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
+
+  const th=thDeg*Math.PI/180, c=Math.cos(th), s=Math.sin(th);
+  const O={x:W*0.15,y:H*0.82};
+  Lslope=Math.min(W*0.52,(O.y-40)/Math.max(0.18,Math.sin(55*Math.PI/180)));
+  if(!init){d=Lslope*0.72;init=true;}
+  const t={x:c,y:-s};              // up-slope
+  const n={x:-s,y:-c};             // normale sortante
+  const T={x:O.x+Lslope*c,y:O.y-Lslope*s};
+  const C={x:O.x+Lslope*c,y:O.y};
+
+  // sol
+  ctx.strokeStyle=AX;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(20,O.y);ctx.lineTo(W-20,O.y);ctx.stroke();
+  // triangle rampe
+  ctx.fillStyle='#eef0f2';ctx.strokeStyle='#c2c6ca';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(O.x,O.y);ctx.lineTo(C.x,C.y);ctx.lineTo(T.x,T.y);ctx.closePath();ctx.fill();ctx.stroke();
+  // hachures pente
+  ctx.strokeStyle='#c9cdd1';ctx.lineWidth=1;
+  for(let q=0.05;q<1;q+=0.09){const bx=O.x+Lslope*q*c,by=O.y-Lslope*q*s;ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(bx-t.x*0+ -n.x*8,by-n.y*8);ctx.stroke();}
+  // angle θ
+  ctx.strokeStyle=ORANGE;ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(O.x,O.y,34,0,-th,true);ctx.stroke();
+  ctx.fillStyle=ORANGE;ctx.font='700 13px system-ui';ctx.textAlign='center';
+  ctx.fillText('θ',O.x+46*Math.cos(-th/2),O.y+46*Math.sin(-th/2)+4);
+
+  // seuil : glisse si tanθ>μs
+  const N=m*g*c, driving=m*g*s, Fsmax=mus*N;
+  const willSlide=Math.tan(th)>mus+1e-9;
+  if(!sliding && willSlide) sliding=true;
+  let Ff,a=0;
+  if(sliding){
+    a=g*(s-muc*c);                 // accélération le long de la pente
+    Ff=muc*N;
+  } else { Ff=driving; }
+
+  // position du bloc
+  const size=40;
+  const bc={x:O.x+d*t.x+n.x*(size/2), y:O.y-d*s + n.y*(size/2)};
+  // wait: recompute properly
+  const surf={x:O.x+d*c, y:O.y-d*s};
+  const BC={x:surf.x+n.x*(size/2), y:surf.y+n.y*(size/2)};
+
+  const kF=4, cap=95;
+  const A=f=>Math.min(f*kF,cap);
+  // décomposition du poids (pointillés)
+  arrow(BC.x,BC.y,-t.x*A(driving),-t.y*A(driving),GREEN,'mg·sinθ',2,[5,4]);   // down-slope
+  arrow(BC.x,BC.y,-n.x*A(m*g*c),-n.y*A(m*g*c),ORANGE,'mg·cosθ',2,[5,4]);      // into surface
+  // forces réelles
+  arrow(BC.x,BC.y,0,A(m*g),INK,'mg',3);                                        // poids
+  arrow(BC.x,BC.y,n.x*A(N),n.y*A(N),BLUE,'N̄',3);                              // normale
+  if(Ff>0.2)arrow(BC.x,BC.y,t.x*A(Ff),t.y*A(Ff),RED,sliding?'F̄fc':'F̄fs',3);   // frottement (up-slope)
+  // vitesse
+  if(sliding&&vel>0.2)arrow(BC.x,BC.y,-t.x*Math.min(vel*4,70),-t.y*Math.min(vel*4,70),'#0F6E56','v̄',2.4);
+
+  // bloc (aligné à la pente)
+  ctx.save();ctx.translate(surf.x,surf.y);ctx.rotate(-th);
+  ctx.fillStyle='#e6f1fb';ctx.strokeStyle=BLUE;ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.roundRect(-size/2,-size,size,size,6);ctx.fill();ctx.stroke();
+  ctx.fillStyle=BLUE_D;ctx.font='600 11px system-ui';ctx.textAlign='center';ctx.fillText(m+' kg',0,-size/2+4);
+  ctx.restore();
+
+  // statut
+  ctx.font='700 15px system-ui';ctx.textAlign='center';
+  if(sliding){ctx.fillStyle=DRED;ctx.fillText('ÇA GLISSE !  (tan θ > μₛ)',W/2,28);}
+  else{ctx.fillStyle=GREY;ctx.fillText('immobile  (tan θ ≤ μₛ : le frottement retient)',W/2,28);}
+
+  // comparateur (panneau) : mg sinθ vs μs mg cosθ
+  const pxX=W-236,pxY=44,pw=220;
+  ctx.fillStyle='#fff';ctx.strokeStyle='#e4e4e4';ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(pxX,pxY,pw,86,12);ctx.fill();ctx.stroke();
+  ctx.textAlign='left';ctx.font='700 11px system-ui';ctx.fillStyle='#333';ctx.fillText('Qui gagne ?',pxX+12,pxY+18);
+  const bmax=m*g, bw=pw-90, bx=pxX+78;
+  ctx.font='600 11px ui-monospace,monospace';
+  ctx.fillStyle=GREEN_D;ctx.textAlign='right';ctx.fillText('mg·sinθ',pxX+72,pxY+40);
+  ctx.fillStyle=GREEN;ctx.fillRect(bx,pxY+31,driving/bmax*bw,11);
+  ctx.fillStyle=DRED;ctx.textAlign='right';ctx.fillText('μₛ·mg·cosθ',pxX+72,pxY+62);
+  ctx.fillStyle=RED;ctx.fillRect(bx,pxY+53,Fsmax/bmax*bw,11);
+  ctx.textAlign='left';ctx.font='700 11px system-ui';
+  ctx.fillStyle=sliding?DRED:GREEN_D;
+  ctx.fillText(sliding?'moteur > frottement → glisse':'frottement ≥ moteur → tient',pxX+12,pxY+80);
+
+  document.getElementById('info').innerHTML=
+    'θ = '+thDeg+'° , tan θ = '+Math.tan(th).toFixed(2)+' &nbsp;|&nbsp; μₛ = '+mus.toFixed(2)+
+    ' → <b style="color:'+DRED+'">angle critique θc = arctan(μₛ) = '+(Math.atan(mus)*180/Math.PI).toFixed(0)+'°</b> &nbsp;|&nbsp; '+
+    'N = mg·cosθ = '+N.toFixed(1)+' N &nbsp;|&nbsp; '+
+    (sliding?('<b style="color:'+DRED+'">a = g(sinθ − μc·cosθ) = '+a.toFixed(2)+' m/s²</b>'):('<b style="color:'+GREEN_D+'">Ff = mg·sinθ = '+driving.toFixed(1)+' N (statique)</b>'));
+
+  // évolution
+  const dt=0.016;
+  if(sliding){
+    vel+=a*dt*3.2;
+    if(vel<=0){vel=0;sliding=Math.tan(th)>mus;}
+    d-=vel*dt*8;
+    if(d<size*0.6){d=Lslope*0.86;vel=0;sliding=Math.tan(th)>mus;}
+  }
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
