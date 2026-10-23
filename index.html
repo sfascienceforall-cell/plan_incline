@@ -1,3 +1,13 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plan incliné · SFA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@500&display=swap">
+</head>
+<body>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:#fff;font-family:system-ui,-apple-system,sans-serif;}
@@ -10,8 +20,83 @@ canvas{display:block;border-radius:12px;border:1.5px solid #e8e8e8;touch-action:
 .info{font-size:12px;padding:8px 14px;border-radius:20px;background:#f5f5f5;border:1.5px solid #d0d0d0;color:#555;margin:6px 0;font-family:ui-monospace,monospace;line-height:1.8;}
 input[type=range]{flex:1;min-width:110px;}
 </style>
+<style id="sfa-kit">
+/* Kit SFA (clair) — plan blanc sur fond gris-bleu froid, encre bleu nuit, or en accent unique, réglages en règle graduée. */
+:root{--bg:#f3f5f8;--paper:#ffffff;--ink:#0c1f2e;--muted:#5b6b7b;--faint:#8a98a6;--rule:#dfe4ea;--rule2:#c9d1da;
+  --gold:#d9973f;--gold-ink:#9a6420;--press:#e9edf2;
+  --f-ui:"Mulish",system-ui,-apple-system,"Segoe UI",sans-serif;--f-math:"STIX Two Text","Cambria Math",serif;
+  --f-num:"JetBrains Mono",ui-monospace,monospace;color-scheme:light}
+html{background:var(--bg)}
+body{background:var(--bg)!important;color:var(--ink);font-family:var(--f-ui)!important;font-size:15px;line-height:1.5;
+  max-width:1180px;margin:0 auto!important;padding:20px 16px 32px!important}
+.sfa-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:6px 24px;
+  border-bottom:1px solid var(--rule);padding-bottom:10px;margin-bottom:16px}
+.sfa-head h1{font:700 1.5rem/1.2 var(--f-ui);margin:0;letter-spacing:-.005em;text-wrap:balance}
+.sfa-head h1 small{display:block;font:400 .88rem var(--f-ui);color:var(--muted);margin-top:3px}
+.sfa-head .sfa-tag{font:600 .8rem var(--f-ui);color:var(--muted)}
+.sfa-head .sfa-tag b{color:var(--gold-ink);font-weight:700}
+select{font:500 .86rem var(--f-ui)!important;border:1px solid var(--rule2)!important;border-radius:3px!important;background:var(--paper)!important;color:var(--ink)!important;padding:5px 8px!important}
+.sfa-stage{border:1px solid var(--rule)!important;border-radius:4px!important;box-shadow:0 1px 2px rgba(12,31,46,.05),0 8px 24px -16px rgba(12,31,46,.18)}
+.sfa-stage canvas{border:0!important;box-shadow:none!important}
+canvas{background:var(--paper);border:1px solid var(--rule)!important;border-radius:4px!important;box-shadow:0 1px 2px rgba(12,31,46,.05),0 8px 24px -16px rgba(12,31,46,.18)}
+.row{gap:12px!important;margin:10px 0!important}
+.pill,.lbl,.tag{background:none!important;border:0!important;border-radius:0!important;padding:0!important;
+  font:600 .86rem var(--f-ui)!important;color:var(--muted);min-width:0}
+.val{background:none!important;border:0!important;border-radius:0!important;padding:0!important;
+  font:500 .9rem var(--f-num)!important;font-variant-numeric:tabular-nums;text-align:right}
+.btn{background:transparent!important;border:1px solid var(--rule2)!important;border-radius:3px!important;color:var(--muted)!important;
+  font:600 .82rem var(--f-ui)!important;padding:6px 12px!important;transition:color .15s,background .15s}
+.btn:hover{color:var(--ink)!important;background:var(--press)!important}
+.btn.on{background:var(--ink)!important;border-color:var(--ink)!important;color:#fff!important;box-shadow:inset 0 -2px 0 var(--gold)}
+.fml{background:transparent!important;border:0!important;border-left:2px solid var(--gold)!important;border-radius:0!important;
+  font:400 1.08rem/1.7 var(--f-math)!important;color:var(--ink);padding:4px 0 4px 14px!important;margin:14px 0!important}
+.info{background:var(--paper)!important;border:1px solid var(--rule)!important;border-radius:3px!important;
+  font:500 .84rem/1.8 var(--f-num)!important;color:var(--muted)!important;padding:8px 14px!important}
+input[type=range]{-webkit-appearance:none;appearance:none;height:24px;background:linear-gradient(var(--rule2),var(--rule2)) center/100% 2px no-repeat;cursor:pointer;--pc:var(--gold)}
+input[type=range]::-webkit-slider-runnable-track{height:2px;background:transparent}
+input[type=range]::-moz-range-track{height:2px;background:transparent}
+input[type=range]::-moz-range-progress{height:2px;background:var(--pc)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:6px;height:20px;border-radius:1px;background:var(--pc);margin-top:-9px;border:0}
+input[type=range]::-moz-range-thumb{width:6px;height:20px;border-radius:1px;background:var(--pc);border:0}
+button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.sfa-foot{margin-top:22px;padding-top:10px;border-top:1px solid var(--rule);font-size:.78rem;color:var(--faint)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<script>
+/* Curseurs : la couleur du curseur reprend celle de son accent-color d'origine ; remplissage gauche en couleur. */
+addEventListener('DOMContentLoaded',()=>{
+/* Curseurs : couleur reprise de accent-color, remplissage à gauche. Resynchronisé en continu pour suivre
+   les curseurs créés ou déplacés par la simulation elle-même. */
+const fill=r=>{if(!r.dataset.sfa){r.dataset.sfa=1;const c=r.style.accentColor||getComputedStyle(r).accentColor;
+    if(c&&c!=='auto')r.style.setProperty('--pc',c);}
+  const v=r.value+'|'+r.min+'|'+r.max;if(r._sv===v)return;r._sv=v;
+  const p=(r.value-r.min)/(r.max-r.min)*100;
+  r.style.background=`linear-gradient(to right,var(--pc) ${p}%,var(--rule2) ${p}%) center/100% 2px no-repeat`;};
+const all=()=>document.querySelectorAll('input[type=range]').forEach(fill);
+all();document.addEventListener('input',e=>{if(e.target.matches&&e.target.matches('input[type=range]'))fill(e.target);});
+setInterval(all,150);
+/* Contrôles écrits en style en ligne (sans classe) : on leur donne les classes du kit. */
+const st=e=>(e.getAttribute('style')||'').replace(/\s/g,'').toLowerCase();
+const isPill=e=>/border-radius:(1[6-9]|20|99)px/.test(st(e));
+document.querySelectorAll('span').forEach(sp=>{if(sp.classList.length||!isPill(sp))return;
+  const n=sp.nextElementSibling,pv=sp.previousElementSibling;
+  if(n&&n.matches('input[type=range],select,button'))sp.classList.add('pill');
+  else if(pv&&pv.matches('input[type=range],select'))sp.classList.add('val');
+  else sp.classList.add('pill');});
+document.querySelectorAll('div').forEach(d=>{if(d.classList.length)return;const s=st(d);
+  if(/border-radius:(1[6-9]|20)px/.test(s)&&/monospace/.test(s))d.classList.add(d.id==='fml'?'fml':'info');
+  else if(d.querySelector(':scope>canvas')&&/border-radius:1[0-4]px/.test(s))d.classList.add('sfa-stage');});
+const tag=b=>{const s=st(b);b.classList.toggle('on',/#185fa5|rgb\(24,95,165\)/.test(s)&&!/#fff[;f]|#ffffff|rgb\(255,255,255\)/.test(s.match(/background:[^;]+/)?.[0]||''));};
+document.querySelectorAll('button:not(.btn)').forEach(b=>{b.classList.add('btn','sfa-n');tag(b);});
+new MutationObserver(ms=>ms.forEach(m=>{if(m.target.classList&&m.target.classList.contains('sfa-n'))tag(m.target);}))
+  .observe(document.body,{subtree:true,attributes:true,attributeFilter:['style']});
+});
+</script>
+<header class="sfa-head"><h1>Plan incliné<small>Décomposition du poids et mouvement sur une pente</small></h1><span class="sfa-tag"><b>SFA</b> · Physique · Cinématique</span></header>
 
-<canvas id="cv" style="width:100%;height:60vh;min-height:400px;"></canvas>
+
+
+<canvas id="cv" style="width:100%;height:66vh;min-height:440px;"></canvas>
 
 <div class="fml">
   <b style="color:#0F6E56">mg·sinθ</b> (moteur, le long de la pente) &nbsp;vs&nbsp; <b style="color:#E24B4A">frottement max = μₛ·N = μₛ·mg·cosθ</b> &nbsp;⇒&nbsp; ça glisse quand <b style="color:#a32d2d">tan θ > μₛ</b> &nbsp;(indépendant de la masse !)
@@ -33,7 +118,8 @@ input[type=range]{flex:1;min-width:110px;}
   <span class="val" id="mucv" style="border-color:#f5c88f;color:#BA7517;">0.25</span>
 </div>
 <div class="row">
-  <button class="btn" style="border-color:#f09595;background:#fcebeb;color:#a32d2d;" onclick="reset()">Replacer le bloc</button>
+  <button class="btn" onclick="reset()">Replacer le bloc</button>
+  <span class="pill" style="font-weight:500!important">Astuce : attrape le bloc et fais-le glisser le long de la pente, puis lâche-le.</span>
 </div>
 
 <div class="info" id="info"></div>
@@ -58,7 +144,7 @@ function syncSize(){const r=cv.getBoundingClientRect();dpr=window.devicePixelRat
   if(nW!==W||nH!==H){W=nW;H=nH;cv.width=W*dpr;cv.height=H*dpr;init=false;}
   ctx.setTransform(dpr,0,0,dpr,0,0);}
 
-function arrow(x,y,vx,vy,col,lab,w,dash){
+function arrow(x,y,vx,vy,col,lab,w,dash,side){
   const len=Math.hypot(vx,vy);if(len<3)return;
   const ex=x+vx,ey=y+vy;
   ctx.strokeStyle=col;ctx.lineWidth=w||2.5;ctx.lineCap='round';
@@ -67,106 +153,137 @@ function arrow(x,y,vx,vy,col,lab,w,dash){
   const hs=(w||2.5)*3.0,ang=Math.atan2(vy,vx);
   ctx.fillStyle=col;ctx.save();ctx.translate(ex,ey);ctx.rotate(ang);
   ctx.beginPath();ctx.moveTo(hs,0);ctx.lineTo(-hs*0.7,-hs*0.55);ctx.lineTo(-hs*0.7,hs*0.55);ctx.closePath();ctx.fill();ctx.restore();
-  if(lab){ctx.font='700 12px system-ui';ctx.textAlign='center';ctx.fillStyle=col;
-    ctx.fillText(lab,ex+vx/len*15,ey+vy/len*15+4);}
+  if(lab){ // étiquette dessinée APRÈS le bloc (file LABELS), placée par (dx,dy,align) pour ne rien couvrir
+    const o=side||{dx:vx/len*16,dy:vy/len*16,al:'center'};
+    LABELS.push([lab,ex+o.dx,ey+o.dy,col,dash?'600 12px':'700 13px',o.al]);}
 }
+let LABELS=[];
+function tag(t,x,y,col,f,al){ // texte avec halo blanc : lisible même posé sur une flèche ou la rampe
+  ctx.font=(f||'700 13px')+' Mulish,system-ui,sans-serif';ctx.textAlign=al||'center';ctx.textBaseline='middle';
+  const w=ctx.measureText(t).width, x0=al==='right'?x-w:al==='left'?x:x-w/2;   // reste dans le cadre
+  x+=Math.max(0,6-x0)-Math.max(0,x0+w-(W-6)); y=Math.max(10,Math.min(H-10,y));
+  ctx.lineWidth=4;ctx.strokeStyle='rgba(255,255,255,.92)';ctx.lineJoin='round';ctx.strokeText(t,x,y);
+  ctx.fillStyle=col;ctx.fillText(t,x,y);ctx.textBaseline='alphabetic';
+}
+
+// --- géométrie partagée avec la saisie au doigt / à la souris ---
+let G=null, drag=false, hover=false;
+const SIZE=()=>Math.max(44,Math.min(64,W*0.055));
 
 function draw(){
   syncSize();
   ctx.clearRect(0,0,W,H);ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
 
   const th=thDeg*Math.PI/180, c=Math.cos(th), s=Math.sin(th);
-  const O={x:W*0.15,y:H*0.82};
-  Lslope=Math.min(W*0.52,(O.y-40)/Math.max(0.18,Math.sin(55*Math.PI/180)));
+  const size=SIZE();
+  // la rampe occupe toute la largeur utile ; à forte pente c'est la hauteur qui limite
+  const kF=Math.max(3.2,Math.min(4.6,H/110)), cap=H*0.24;
+  const A=f=>Math.min(f*kF,cap);
+  // sol placé assez haut pour que le poids (flèche vers le bas) reste dans le cadre
+  const O={x:Math.max(40,W*0.06),y:H-Math.max(46,A(m*g)*0.8+24)};
+  LABELS=[];
+  Lslope=Math.min((W-O.x-40)/c,(O.y-70)/s);
   if(!init){d=Lslope*0.72;init=true;}
-  const t={x:c,y:-s};              // up-slope
+  d=Math.min(d,Lslope-size*0.6);
+  const t={x:c,y:-s};              // vers le haut de la pente
   const n={x:-s,y:-c};             // normale sortante
   const T={x:O.x+Lslope*c,y:O.y-Lslope*s};
   const C={x:O.x+Lslope*c,y:O.y};
+  G={O,t,n,c,s,th,size};
 
   // sol
-  ctx.strokeStyle=AX;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(20,O.y);ctx.lineTo(W-20,O.y);ctx.stroke();
-  // triangle rampe
-  ctx.fillStyle='#eef0f2';ctx.strokeStyle='#c2c6ca';ctx.lineWidth=2;
+  ctx.strokeStyle=AX;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(12,O.y);ctx.lineTo(W-12,O.y);ctx.stroke();
+  ctx.strokeStyle='#dfe3e7';ctx.lineWidth=1;
+  for(let x=20;x<W-12;x+=14){ctx.beginPath();ctx.moveTo(x,O.y+1);ctx.lineTo(x-8,O.y+9);ctx.stroke();}
+  // rampe
+  ctx.fillStyle='#f1f3f5';ctx.strokeStyle='#b8bec5';ctx.lineWidth=2;
   ctx.beginPath();ctx.moveTo(O.x,O.y);ctx.lineTo(C.x,C.y);ctx.lineTo(T.x,T.y);ctx.closePath();ctx.fill();ctx.stroke();
-  // hachures pente
-  ctx.strokeStyle='#c9cdd1';ctx.lineWidth=1;
-  for(let q=0.05;q<1;q+=0.09){const bx=O.x+Lslope*q*c,by=O.y-Lslope*q*s;ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(bx-t.x*0+ -n.x*8,by-n.y*8);ctx.stroke();}
+  // graduations le long de la pente (tous les 10 %)
+  ctx.strokeStyle='#cfd4d9';ctx.lineWidth=1;
+  for(let q=0.1;q<1;q+=0.1){const bx=O.x+Lslope*q*c,by=O.y-Lslope*q*s;ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(bx-n.x*7,by-n.y*7);ctx.stroke();}
   // angle θ
-  ctx.strokeStyle=ORANGE;ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(O.x,O.y,34,0,-th,true);ctx.stroke();
-  ctx.fillStyle=ORANGE;ctx.font='700 13px system-ui';ctx.textAlign='center';
-  ctx.fillText('θ',O.x+46*Math.cos(-th/2),O.y+46*Math.sin(-th/2)+4);
+  ctx.strokeStyle=ORANGE;ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(O.x,O.y,46,0,-th,true);ctx.stroke();
+  tag('θ = '+thDeg+'°',O.x+76*Math.cos(-th/2)+14,O.y+60*Math.sin(-th/2),ORANGE,'700 13px');
 
-  // seuil : glisse si tanθ>μs
+  // physique : glisse si tanθ > μs
   const N=m*g*c, driving=m*g*s, Fsmax=mus*N;
   const willSlide=Math.tan(th)>mus+1e-9;
-  if(!sliding && willSlide) sliding=true;
+  if(!drag && !sliding && willSlide) sliding=true;
   let Ff,a=0;
-  if(sliding){
-    a=g*(s-muc*c);                 // accélération le long de la pente
-    Ff=muc*N;
-  } else { Ff=driving; }
+  if(drag){Ff=0;}
+  else if(sliding){a=g*(s-muc*c);Ff=muc*N;}
+  else {Ff=driving;}
 
-  // position du bloc
-  const size=40;
-  const bc={x:O.x+d*t.x+n.x*(size/2), y:O.y-d*s + n.y*(size/2)};
-  // wait: recompute properly
   const surf={x:O.x+d*c, y:O.y-d*s};
   const BC={x:surf.x+n.x*(size/2), y:surf.y+n.y*(size/2)};
+  G.BC=BC;
 
-  const kF=4, cap=95;
-  const A=f=>Math.min(f*kF,cap);
-  // décomposition du poids (pointillés)
-  arrow(BC.x,BC.y,-t.x*A(driving),-t.y*A(driving),GREEN,'mg·sinθ',2,[5,4]);   // down-slope
-  arrow(BC.x,BC.y,-n.x*A(m*g*c),-n.y*A(m*g*c),ORANGE,'mg·cosθ',2,[5,4]);      // into surface
+  // décomposition du poids (pointillés) — étiquettes écartées des flèches pleines
+  // composantes du poids (pointillés) : mg·sinθ part vers le bas-gauche, mg·cosθ vers le bas-droite
+  arrow(BC.x,BC.y,-t.x*A(driving),-t.y*A(driving),GREEN,'mg·sinθ',2,[5,4],{dx:-6,dy:12,al:'right'});
+  arrow(BC.x,BC.y,-n.x*A(m*g*c),-n.y*A(m*g*c),ORANGE,'mg·cosθ',2,[5,4],{dx:8,dy:6,al:'left'});
   // forces réelles
-  arrow(BC.x,BC.y,0,A(m*g),INK,'mg',3);                                        // poids
-  arrow(BC.x,BC.y,n.x*A(N),n.y*A(N),BLUE,'N̄',3);                              // normale
-  if(Ff>0.2)arrow(BC.x,BC.y,t.x*A(Ff),t.y*A(Ff),RED,sliding?'F̄fc':'F̄fs',3);   // frottement (up-slope)
-  // vitesse
-  if(sliding&&vel>0.2)arrow(BC.x,BC.y,-t.x*Math.min(vel*4,70),-t.y*Math.min(vel*4,70),'#0F6E56','v̄',2.4);
+  arrow(BC.x,BC.y,0,A(m*g),INK,'P = mg',3,null,{dx:-9,dy:-4,al:'right'});
+  arrow(BC.x,BC.y,n.x*A(N),n.y*A(N),BLUE,'N',3);
+  if(Ff>0.2)arrow(BC.x,BC.y,t.x*A(Ff),t.y*A(Ff),RED,sliding?'Ff cinétique':'Ff statique',3,null,{dx:6,dy:-12,al:'left'});
+  if(sliding&&vel>0.2)arrow(surf.x+n.x*(size+14)+t.x*size*0.5,surf.y+n.y*(size+14)+t.y*size*0.5,-t.x*Math.min(vel*4,70),-t.y*Math.min(vel*4,70),GREEN_D,'v',2.4,null,{dx:-8,dy:-8,al:'right'});
 
   // bloc (aligné à la pente)
   ctx.save();ctx.translate(surf.x,surf.y);ctx.rotate(-th);
-  ctx.fillStyle='#e6f1fb';ctx.strokeStyle=BLUE;ctx.lineWidth=2.5;
-  ctx.beginPath();ctx.roundRect(-size/2,-size,size,size,6);ctx.fill();ctx.stroke();
-  ctx.fillStyle=BLUE_D;ctx.font='600 11px system-ui';ctx.textAlign='center';ctx.fillText(m+' kg',0,-size/2+4);
+  ctx.shadowColor='rgba(12,31,46,.18)';ctx.shadowBlur=drag?16:6;ctx.shadowOffsetY=drag?6:2;
+  ctx.fillStyle=drag||hover?'#d6e8fa':'#e6f1fb';ctx.strokeStyle=BLUE;ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.roundRect(-size/2,-size,size,size,6);ctx.fill();ctx.shadowColor='transparent';ctx.stroke();
+  ctx.fillStyle=BLUE_D;ctx.font='700 13px Mulish,system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(m+' kg',0,-size/2);ctx.textBaseline='alphabetic';
   ctx.restore();
+  LABELS.forEach(l=>tag(...l));
 
-  // statut
-  ctx.font='700 15px system-ui';ctx.textAlign='center';
-  if(sliding){ctx.fillStyle=DRED;ctx.fillText('ÇA GLISSE !  (tan θ > μₛ)',W/2,28);}
-  else{ctx.fillStyle=GREY;ctx.fillText('immobile  (tan θ ≤ μₛ : le frottement retient)',W/2,28);}
-
-  // comparateur (panneau) : mg sinθ vs μs mg cosθ
-  const pxX=W-236,pxY=44,pw=220;
-  ctx.fillStyle='#fff';ctx.strokeStyle='#e4e4e4';ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(pxX,pxY,pw,86,12);ctx.fill();ctx.stroke();
-  ctx.textAlign='left';ctx.font='700 11px system-ui';ctx.fillStyle='#333';ctx.fillText('Qui gagne ?',pxX+12,pxY+18);
-  const bmax=m*g, bw=pw-90, bx=pxX+78;
-  ctx.font='600 11px ui-monospace,monospace';
-  ctx.fillStyle=GREEN_D;ctx.textAlign='right';ctx.fillText('mg·sinθ',pxX+72,pxY+40);
-  ctx.fillStyle=GREEN;ctx.fillRect(bx,pxY+31,driving/bmax*bw,11);
-  ctx.fillStyle=DRED;ctx.textAlign='right';ctx.fillText('μₛ·mg·cosθ',pxX+72,pxY+62);
-  ctx.fillStyle=RED;ctx.fillRect(bx,pxY+53,Fsmax/bmax*bw,11);
-  ctx.textAlign='left';ctx.font='700 11px system-ui';
+  // panneau « qui gagne ? » en haut à gauche, au-dessus du pied de la rampe (zone toujours libre)
+  const pxX=14,pxY=14,pw=Math.min(250,W*0.42);
+  ctx.fillStyle='rgba(255,255,255,.94)';ctx.strokeStyle='#dfe4ea';ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(pxX,pxY,pw,104,4);ctx.fill();ctx.stroke();
+  ctx.textAlign='left';ctx.font='700 13px Mulish,system-ui,sans-serif';
+  ctx.fillStyle=drag?BLUE_D:sliding?DRED:GREY;
+  ctx.fillText(drag?'Tu tiens le bloc':sliding?'Ça glisse  (tan θ > μₛ)':'Immobile  (tan θ ≤ μₛ)',pxX+12,pxY+22);
+  const bmax=m*g, bx=pxX+92, bw=pw-104;
+  ctx.font='600 11px JetBrains Mono,ui-monospace,monospace';
+  ctx.fillStyle=GREEN_D;ctx.textAlign='right';ctx.fillText('mg·sinθ',pxX+84,pxY+48);
+  ctx.fillStyle='#eef0f2';ctx.fillRect(bx,pxY+39,bw,11);ctx.fillRect(bx,pxY+61,bw,11);
+  ctx.fillStyle=GREEN;ctx.fillRect(bx,pxY+39,driving/bmax*bw,11);
+  ctx.fillStyle=DRED;ctx.textAlign='right';ctx.fillText('μₛ·mg·cosθ',pxX+84,pxY+70);
+  ctx.fillStyle=RED;ctx.fillRect(bx,pxY+61,Fsmax/bmax*bw,11);
+  ctx.textAlign='left';ctx.font='600 11px Mulish,system-ui,sans-serif';
   ctx.fillStyle=sliding?DRED:GREEN_D;
-  ctx.fillText(sliding?'moteur > frottement → glisse':'frottement ≥ moteur → tient',pxX+12,pxY+80);
+  ctx.fillText(sliding?'moteur > frottement max → glisse':'frottement max ≥ moteur → tient',pxX+12,pxY+92);
 
   document.getElementById('info').innerHTML=
     'θ = '+thDeg+'° , tan θ = '+Math.tan(th).toFixed(2)+' &nbsp;|&nbsp; μₛ = '+mus.toFixed(2)+
     ' → <b style="color:'+DRED+'">angle critique θc = arctan(μₛ) = '+(Math.atan(mus)*180/Math.PI).toFixed(0)+'°</b> &nbsp;|&nbsp; '+
     'N = mg·cosθ = '+N.toFixed(1)+' N &nbsp;|&nbsp; '+
-    (sliding?('<b style="color:'+DRED+'">a = g(sinθ − μc·cosθ) = '+a.toFixed(2)+' m/s²</b>'):('<b style="color:'+GREEN_D+'">Ff = mg·sinθ = '+driving.toFixed(1)+' N (statique)</b>'));
+    (drag?'<b style="color:'+BLUE_D+'">bloc tenu à la main</b>':sliding?('<b style="color:'+DRED+'">a = g(sinθ − μc·cosθ) = '+a.toFixed(2)+' m/s²</b>'):('<b style="color:'+GREEN_D+'">Ff = mg·sinθ = '+driving.toFixed(1)+' N (statique)</b>'));
 
   // évolution
   const dt=0.016;
-  if(sliding){
+  if(sliding&&!drag){
     vel+=a*dt*3.2;
     if(vel<=0){vel=0;sliding=Math.tan(th)>mus;}
     d-=vel*dt*8;
-    if(d<size*0.6){d=Lslope*0.86;vel=0;sliding=Math.tan(th)>mus;}
+    if(d<size*1.8){d=size*1.8;vel=0;sliding=false;}   // le bloc s'arrête au pied de la rampe
   }
   requestAnimationFrame(draw);
 }
+
+// --- saisir le bloc et le faire glisser le long de la pente (souris + tactile) ---
+function pt(e){const r=cv.getBoundingClientRect();const q=e.touches?e.touches[0]:e;return {x:q.clientX-r.left,y:q.clientY-r.top};}
+function onBlock(p){if(!G)return false;return Math.hypot(p.x-G.BC.x,p.y-G.BC.y)<G.size*0.85;}
+function moveTo(p){const {O,c,s,size}=G;const proj=(p.x-O.x)*c-(p.y-O.y)*s; // projection sur la pente
+  d=Math.max(size*1.8,Math.min(Lslope-size*0.6,proj));}
+cv.style.cursor='default';cv.style.touchAction='none';
+cv.addEventListener('pointerdown',e=>{const p=pt(e);if(onBlock(p)){drag=true;sliding=false;vel=0;cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing';}});
+cv.addEventListener('pointermove',e=>{const p=pt(e);if(drag){moveTo(p);}else{hover=onBlock(p);cv.style.cursor=hover?'grab':'default';}});
+const release=()=>{if(drag){drag=false;vel=0;sliding=Math.tan(G.th)>mus;cv.style.cursor='grab';}};
+cv.addEventListener('pointerup',release);cv.addEventListener('pointercancel',release);
 draw();
 </script>
+<footer class="sfa-foot">Science For All · simulations interactives</footer>
+</body>
+</html>
